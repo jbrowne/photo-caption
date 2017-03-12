@@ -1,7 +1,12 @@
 import sys
+import glob
 from imageutils import ImageCaptioner
+
 def main(argv):
-    allFiles = argv[1:]
+    if '*' in argv[1]:
+        allFiles = glob.glob(argv[1])
+    else:
+        allFiles = argv[1:]
 
     for idx, filename in enumerate(allFiles):
         imgCaptioner = ImageCaptioner()
