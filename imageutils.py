@@ -3,6 +3,7 @@ from PIL import ImageDraw
 from PIL import ImageFont
 from os import path
 from os import mkdir
+import platform
 
 class ImageCaptioner():
     def __init__(self, viewWindowSize=(1024,768), captionPath="Captions"):
@@ -22,7 +23,6 @@ class ImageCaptioner():
         try:
             self.image = Image.open(filename)
         except:
-            print "Failed!"
             return False
 
         self.filename = filename
@@ -42,6 +42,8 @@ class ImageCaptioner():
 
         print "Processing", '"' + self.filename + '"'
         self.caption = path.splitext(path.basename(self.filename))[0]
+        #Split the caption at semi-colons
+        self.caption = "\n".join([line.strip() for line in self.caption.split(";")])
         print " | Caption:", self.caption
         print " | Size:", self.image.size
         self.imageWithCaption = addCaptionToImage(self.image, self.caption)
@@ -79,15 +81,18 @@ def addCaptionToImage(image, caption, margin=10):
     w,h = image.size
     #Figure out how much space the caption needs
     fontSize = max(h / 36, 10)
-    font = ImageFont.truetype("LiberationSans-Regular.ttf", fontSize)
+    if platform.system() == "Linux":
+        font = ImageFont.truetype("LiberationSans-Regular.ttf", fontSize)
+    elif platform.system() == "Windows":
+        font = ImageFont.truetype("arial.ttf", fontSize)
+
     textSize = font.getsize(caption)
-    if textSize[0] > w + 2 * margin:
-        print "Caption is too long for the image!"
-        return
 
     # Add black border for the caption
-    newHeight = h + 2 * margin + textSize[1]
-    captionImg = Image.new("RGB", (w,newHeight,))
+    numLines = len(caption.split("\n"))
+    newHeight = h + 2 * margin + textSize[1] * numLines
+    newWidth = max (w, textSize[0])
+    captionImg = Image.new("RGB", (newWidth ,newHeight,))
     pasteBox = (0,0, w, h)
     captionImg.paste(image, pasteBox)
 
