@@ -19,10 +19,11 @@ class ImageCaptioner():
 
 
     def loadImage(self, filename):
-        print "Loading", filename
+        print "Loading", path.basename(filename), "..."
         try:
             self.image = Image.open(filename)
         except:
+            print " | Error: Could not load."
             return False
 
         self.filename = filename
@@ -45,7 +46,6 @@ class ImageCaptioner():
         #Split the caption at semi-colons
         self.caption = "\n".join([line.strip() for line in self.caption.split(";")])
         print " | Caption:", self.caption
-        print " | Size:", self.image.size
         self.imageWithCaption = addCaptionToImage(self.image, self.caption)
         return True
 
